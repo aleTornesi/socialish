@@ -17,7 +17,8 @@ import LocalizationProvider from "@mui/lab/LocalizationProvider";
 import AdapterDayJS from "@mui/lab/AdapterDayjs";
 import dayjs, { Dayjs } from "dayjs";
 import { useState } from "react";
-import firebase, {auth} from '../firebaseConfig'
+import firebase, { auth } from '../firebaseConfig'
+import IUser from '../interfaces/User'
 import { createUserWithEmailAndPassword, UserCredential } from "firebase/auth";
 import { useRouter } from "next/router";
 
@@ -50,15 +51,21 @@ export default function SignUp() {
         const data = new FormData(event.currentTarget)
         if (birthDate) {
             createUserWithEmailAndPassword(auth, data.get('email')!.toString(), data.get('password')!.toString())
-                .then((userCredential: UserCredential) => {
-                    const user = userCredential.user
+				.then((userCredential: UserCredential) => {
+					const user = userCredential.user
+					const userData: IUser = {
+						uid: user.uid,
+						firstName: data.get("firstName")!.toString(),
+						lastName: data.get("lastName")!.toString(),
+						username: data.get("username")!.toString(),
+						birthDate: birthDate.toDate(),
+						bio: data.get("bio")!.toString(),
+						postsNumber: 0,
+						followersNumber: 0,
+						followingNumber: 0
+					};
                     const document = firebase.firestore().collection('Users').doc(user.uid)
-                    document.set({
-                        name: data.get('firstName')!.toString(),
-                        lastName: data.get('lastName')!.toString(),
-                        username: data.get('username')!.toString(),
-                        birthDate: birthDate.toISOString()
-                    })
+                    document.set(userData)
                     router.push('/')
                 })
                 .catch((err) => {
@@ -141,29 +148,41 @@ export default function SignUp() {
 									id="password"
 									autoComplete="new-password"
 								/>
-                            </Grid>
-                            <Grid item xs={12}>
+							</Grid>
+							<Grid item xs={12}>
 								<LocalizationProvider dateAdapter={AdapterDayJS}>
-                                    <DatePicker
-                                        label="Birth date"
+									<DatePicker
+										label="Birth date"
 										value={birthDate}
 										onChange={(newValue) => setBirthDate(newValue)}
-										renderInput={(params) => <TextField fullWidth {...params} />}
+										renderInput={(params) => (
+											<TextField fullWidth {...params} />
+										)}
 									/>
 								</LocalizationProvider>
 							</Grid>
-                        </Grid>
+							<Grid item xs={12}>
+								<TextField
+									id="outlined-multiline-static"
+									label="Bio"
+									name="bio"
+									fullWidth
+									multiline
+									rows={4}
+								/>
+							</Grid>
+						</Grid>
 						<Button
 							type="submit"
 							fullWidth
-                            variant="contained"
+							variant="contained"
 							sx={{ mt: 3, mb: 2 }}>
-                            Sign Up
+							Sign Up
 						</Button>
 					</Box>
 				</Box>
 				<Copyright sx={{ mt: 5 }} />
 			</Container>
 		</ThemeProvider>
-    );
+	);
 }

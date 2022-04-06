@@ -7,3 +7,4 @@ if(!firebase.apps.length)
 
 export default firebase;
 export const auth: Auth = getAuth()
+export const db : firebase.firestore.Firestore = firebase.firestore()

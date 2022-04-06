@@ -21,19 +21,21 @@ import { browserSessionPersistence, getAuth, GoogleAuthProvider, setPersistence,
 import { FirebaseError } from "@firebase/util";
 import { FirebaseApp } from "@firebase/app";
 import { useRouter } from "next/router";
+import { useContext } from "react";
+import { AuthUserContext, useAuth } from "../context/userContext";
 
 const theme = createTheme();
 
 export default () => {
 	const router = useRouter();
-
 	const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
 		const data = new FormData(event.currentTarget);
-		console.log({
-			email: data.get("email"),
-			password: data.get("password"),
-		});
+		firebase.auth().signInWithEmailAndPassword(data.get("email")!.toString(), data.get("password")!.toString()).then(
+			(value: firebase.auth.UserCredential) => {
+				router.push('/')
+			}
+		)
 	};
 
 	return (
@@ -67,15 +69,6 @@ export default () => {
 							name="email"
 							autoComplete="email"
 							autoFocus
-						/>
-						<TextField
-							margin="normal"
-							required
-							fullWidth
-							id="username"
-							label="Username"
-							name="username"
-							autoComplete="username"
 						/>
 						<TextField
 							margin="normal"
